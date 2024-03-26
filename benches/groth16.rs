@@ -16,10 +16,13 @@ fn bench_groth(c: &mut Criterion, num_validators: u32, num_constraints: u32) {
         "./test-vectors/complex-circuit/complex-circuit-{}-{}.zkey",
         i, j
     );
+    println!("Reading .zkey file...");
+    let start = std::time::Instant::now();
     let mut file = File::open(path).unwrap();
     let (params, matrices) = read_zkey(&mut file).unwrap();
     let num_inputs = matrices.num_instance_variables;
     let num_constraints = matrices.num_constraints;
+    println!("Took: {:?}", start.elapsed());
 
     let inputs = {
         let mut inputs: HashMap<String, Vec<num_bigint::BigInt>> = HashMap::new();
@@ -29,6 +32,8 @@ fn bench_groth(c: &mut Criterion, num_validators: u32, num_constraints: u32) {
         inputs
     };
 
+    println!("Calculating witness...");
+    let start = std::time::Instant::now();
     let mut wtns = WitnessCalculator::new(format!(
         "./test-vectors/complex-circuit/complex-circuit-{}-{}.wasm",
         i, j
@@ -37,7 +42,10 @@ fn bench_groth(c: &mut Criterion, num_validators: u32, num_constraints: u32) {
     let full_assignment = wtns
         .calculate_witness_element::<Bn254, _>(inputs, false)
         .unwrap();
+    println!("Took: {:?}", start.elapsed());
 
+    println!("Computing proof...");
+    let start = std::time::Instant::now();
     let mut rng = thread_rng();
     use ark_std::UniformRand;
     let rng = &mut rng;
@@ -55,7 +63,9 @@ fn bench_groth(c: &mut Criterion, num_validators: u32, num_constraints: u32) {
         full_assignment.as_slice(),
     )
     .unwrap();
+    println!("Took: {:?}", start.elapsed());
 
+    println!("Verifying proof...");
     let pvk = Groth16::<Bn254>::process_vk(&params.vk).unwrap();
     let inputs = &full_assignment[1..num_inputs];
     let verified = Groth16::<Bn254>::verify_with_processed_vk(&pvk, inputs, &proof).unwrap();
@@ -97,7 +107,8 @@ cfg_if::cfg_if! {
         criterion_group!(benches, groth_all);
     } else {
       fn groth(c: &mut Criterion) {
-        bench_groth(c, 10000, 10000);
+        //bench_groth(c, 10000, 10000);
+        bench_groth(c, 1270049, 1299928);
       }
       criterion_group!(benches, groth);
     }

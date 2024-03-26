@@ -1,3 +1,5 @@
+pragma circom 2.1.3;
+
 template ManyConstraints(NUM_VARIABLES, NUM_CONSTRAINTS) {
     signal private input a;
     signal output c;

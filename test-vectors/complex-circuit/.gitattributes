@@ -1,0 +1,4 @@
+complex-circuit-10000-10000.r1cs filter=lfs diff=lfs merge=lfs -text
+complex-circuit-1270049-1299928.r1cs filter=lfs diff=lfs merge=lfs -text
+complex-circuit-10000-10000.zkey filter=lfs diff=lfs merge=lfs -text
+complex-circuit-1270049-1299928.zkey filter=lfs diff=lfs merge=lfs -text
